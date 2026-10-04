@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Slow Growing</title>
+<meta name="theme-color" content="#EDEDEA">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #EDEDEA;
+    --card: #FFFFFF;
+    --ink: #2F2F2F;
+    --muted: #8A8A8A;
+    --line: #D9D9D6;
+    --accent: #5F93C6;
+    --accent-soft: #B7CDE0;
+    --outer: #333333;
+    --font: "Montserrat", "Noto Sans TC", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: var(--font);
+    color: var(--ink);
+    background-color: var(--outer);
+    background-image:
+      linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+    background-size: 68px 68px;
+    display: flex; justify-content: center; align-items: center;
+  }
+  button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; padding: 0; }
+  input { font: inherit; color: inherit; }
+
+  .phone {
+    position: relative;
+    width: 100%; max-width: 430px; height: 100%;
+    background: var(--bg);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  @media (min-width: 520px) {
+    .phone { height: min(900px, calc(100% - 48px)); border-radius: 56px; box-shadow: 0 30px 80px rgba(0,0,0,.45); }
+  }
+  .screen { flex: 1; overflow-y: auto; padding: 28px 20px 120px; scrollbar-width: none; }
+  .screen::-webkit-scrollbar { display: none; }
+
+  /* ---------- header ---------- */
+  .brand { display: flex; align-items: center; gap: 14px; padding: 8px 6px 0; }
+  .brand h1 { font-size: 26px; font-weight: 700; margin: 0; flex: 1; letter-spacing: .5px; }
+  .menu-btn { width: 40px; height: 40px; display: grid; place-items: center; }
+  .menu-btn span { display: block; width: 26px; height: 2px; background: #B5B5B2; border-radius: 2px; box-shadow: 0 -8px 0 #B5B5B2, 0 8px 0 #B5B5B2; }
+
+  .mascot { width: 46px; height: 42px; flex: none; }
+  .mascot .eyes { animation: look 6s ease-in-out infinite; }
+  .mascot .eye { transform-box: fill-box; transform-origin: center; animation: blink 4.2s infinite; }
+  @keyframes look {
+    0%, 18% { transform: translateX(0); }
+    24%, 40% { transform: translateX(-4px); }
+    46%, 62% { transform: translateX(4px); }
+    68%, 100% { transform: translateX(0); }
+  }
+  @keyframes blink {
+    0%, 92%, 100% { transform: scaleY(1); }
+    95% { transform: scaleY(.1); }
+  }
+
+  .tabs { display: flex; gap: 10px; justify-content: center; margin: 26px 0 24px; }
+  .tab {
+    flex: 1; max-width: 120px; height: 52px; border-radius: 26px;
+    background: var(--card); font-size: 16px; font-weight: 500;
+    transition: background .2s, color .2s;
+  }
+  .tab.on { background: var(--accent); color: #fff; }
+
+  /* ---------- habit cards (main) ---------- */
+  .list { display: flex; flex-direction: column; gap: 18px; }
+  .hcard {
+    position: relative; overflow: hidden;
+    background: var(--card); border-radius: 30px;
+    min-height: 96px; display: flex; align-items: center;
+    padding: 0 18px 0 30px;
+  }
+  .blob {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    border-radius: 0 56px 56px 0 / 0 50% 50% 0;
+    transition: width .6s cubic-bezier(.3,1.4,.5,1);
+  }
+  .hcard .info { position: relative; flex: 1; min-width: 0; cursor: pointer; }
+  .hname { font-family: "Noto Sans TC", var(--font); font-weight: 700; font-size: 19px; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hfreq { font-size: 13px; letter-spacing: 1px; margin-top: 4px; color: #444; }
+  .pct { position: relative; font-size: 34px; font-weight: 400; margin-right: 18px; }
+  .check {
+    position: relative; flex: none;
+    width: 46px; height: 46px; border-radius: 50%;
+    border: 2px solid #9C9C9C; display: grid; place-items: center;
+    transition: transform .15s, background .2s, border-color .2s;
+  }
+  .check:active { transform: scale(.9); }
+  .check svg { width: 20px; height: 20px; stroke: #9C9C9C; }
+  .check.done { border-color: transparent; }
+  .check.done svg { stroke: #fff; }
+  .check.pop { animation: pop .35s; }
+  @keyframes pop { 50% { transform: scale(1.18); } }
+
+  /* ---------- week ---------- */
+  .wcard { background: var(--card); border-radius: 22px; padding: 16px 14px 16px 20px; display: flex; align-items: center; gap: 10px; }
+  .wcard .info { flex: 0 0 82px; min-width: 0; cursor: pointer; }
+  .wcard .hname { font-size: 15px; letter-spacing: .5px; }
+  .wcard .hfreq { font-size: 10px; }
+  .wgrid { flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; justify-items: center; }
+  .wgrid .dow { font-size: 10px; color: #555; }
+  .cell { width: 100%; max-width: 20px; aspect-ratio: 1; border-radius: 5px; border: 1.5px solid transparent; }
+  button.cell { cursor: pointer; }
+  .wcard .check { width: 34px; height: 34px; }
+  .wcard .check svg { width: 15px; height: 15px; }
+
+  /* ---------- month ---------- */
+  .mhead { display: flex; align-items: center; gap: 6px; margin-bottom: 24px; }
+  .arrow { width: 32px; height: 40px; display: grid; place-items: center; color: #B5B5B2; }
+  .arrow svg { width: 14px; height: 14px; }
+  .mpill { flex: 1; background: var(--card); border-radius: 60px; padding: 22px 10px; text-align: center; }
+  .mpill .ym { font-size: 15px; font-weight: 600; letter-spacing: 1px; }
+  .mpill .avg { margin-top: 6px; font-size: 14px; font-weight: 500; }
+  .mpill .avg b { font-size: 28px; font-weight: 500; color: var(--accent); margin-left: 8px; vertical-align: -3px; }
+  .mcard { background: var(--card); border-radius: 26px; padding: 20px; display: flex; gap: 12px; min-height: 160px; }
+  .mcard .left { flex: 1; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; min-width: 0; }
+  .mcard .hname { font-size: 16px; }
+  .mcard .hfreq { font-size: 11px; }
+  .mcard .pctsm { font-size: 24px; }
+  .mgrid { display: grid; grid-template-columns: repeat(7, 18px); gap: 6px; align-content: start; }
+  .mgrid .cell { max-width: none; }
+  .mcard .check { width: 34px; height: 34px; align-self: flex-start; }
+  .mcard .check svg { width: 15px; height: 15px; }
+
+  /* ---------- FAB ---------- */
+  .fab {
+    position: absolute; right: 24px; bottom: 34px; z-index: 5;
+    width: 72px; height: 72px; border-radius: 50%; background: var(--card);
+    box-shadow: 0 6px 20px rgba(0,0,0,.08); display: grid; place-items: center;
+  }
+  .fab svg { width: 30px; height: 30px; }
+  .fade-bottom { position: absolute; left: 0; right: 0; bottom: 0; height: 110px; pointer-events: none; background: linear-gradient(transparent, var(--bg) 70%); }
+
+  /* ---------- top bar (detail / edit) ---------- */
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
+  .topbar h2 { font-family: "Noto Sans TC", var(--font); font-size: 22px; letter-spacing: 2px; margin: 0; font-weight: 700; }
+  .round { width: 72px; height: 72px; border-radius: 50%; background: var(--card); display: grid; place-items: center; flex: none; transition: background .2s; }
+  .round svg { width: 24px; height: 24px; }
+  .round.save { background: var(--accent-soft); }
+  .round.save svg { stroke: #fff; }
+  .round.save.ready { background: var(--accent); }
+
+  /* ---------- detail ---------- */
+  .card { background: var(--card); border-radius: 36px; padding: 28px 30px; margin-bottom: 26px; }
+  .label { font-size: 15px; font-weight: 600; letter-spacing: 1px; }
+  .bigrow { display: flex; align-items: center; justify-content: space-between; margin: 6px 0 18px; }
+  .big { font-size: 56px; font-weight: 400; letter-spacing: 1px; }
+  .chip { border-radius: 20px; padding: 10px 16px; font-size: 13px; font-weight: 500; letter-spacing: 1px; }
+  .bar { height: 12px; border-radius: 8px; overflow: hidden; }
+  .bar > div { height: 100%; border-radius: 8px; transition: width .5s; }
+  .sub { margin-top: 18px; font-size: 15px; color: #777; letter-spacing: 1px; }
+  .calhead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .calhead .ym { font-size: 19px; font-weight: 600; letter-spacing: 2px; }
+  .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px 6px; justify-items: center; }
+  .cal .dow { font-size: 14px; color: #555; padding-bottom: 6px; }
+  .day {
+    width: 100%; max-width: 54px; aspect-ratio: 1; border-radius: 50%;
+    display: grid; place-items: center; font-size: 17px; font-weight: 500;
+    transition: transform .15s, background .2s;
+  }
+  button.day:active { transform: scale(.9); }
+  .day.future { color: #C2C2C2; }
+  .day.today { box-shadow: inset 0 0 0 2px var(--ink); }
+  .hint { text-align: center; font-size: 12px; color: var(--muted); margin-top: 18px; letter-spacing: 1px; }
+
+  /* ---------- edit ---------- */
+  .field { width: 100%; height: 92px; border-radius: 36px; border: 0; outline: none; background: var(--card); padding: 0 32px; font-size: 20px; font-family: "Noto Sans TC", var(--font); font-weight: 500; letter-spacing: 1px; }
+  .field::placeholder { color: #9A9A9A; }
+  .seg { display: flex; gap: 12px; margin: 26px 0; padding: 0 12px; }
+  .seg button { flex: 1; height: 58px; border-radius: 30px; background: var(--card); font-size: 16px; font-weight: 500; letter-spacing: .5px; transition: background .2s, color .2s; }
+  .seg button.on { background: var(--accent); color: #fff; }
+  .stepper { display: flex; align-items: center; justify-content: space-between; }
+  .stepper .t1 { font-family: "Noto Sans TC", var(--font); font-size: 22px; font-weight: 700; letter-spacing: 2px; }
+  .stepper .t1 em { font-style: normal; color: var(--accent); font-weight: 400; margin: 0 4px; }
+  .stepper .t2 { font-size: 15px; letter-spacing: 1.5px; margin-top: 10px; }
+  .stepctl { display: flex; align-items: center; gap: 14px; }
+  .stepctl button { width: 56px; height: 56px; border-radius: 50%; background: #EDEDEA; font-size: 24px; display: grid; place-items: center; }
+  .stepctl button:disabled { opacity: .35; cursor: default; }
+  .stepctl output { width: 34px; text-align: center; font-size: 34px; }
+  .colors { display: flex; justify-content: space-between; margin-top: 22px; }
+  .swatch { width: 44px; height: 44px; border-radius: 50%; box-shadow: 0 0 0 0 var(--ink); transition: box-shadow .15s; }
+  .swatch.on { box-shadow: 0 0 0 4px #fff, 0 0 0 7px var(--ink); }
+  .preview { margin-top: 6px; }
+  .preview .hcard { padding-right: 30px; }
+  .cap { text-align: center; font-size: 13px; color: #777; margin-top: 10px; letter-spacing: 2px; }
+  .danger { display: block; margin: 30px auto 0; color: #C0605F; font-size: 14px; letter-spacing: 1px; padding: 10px 20px; }
+
+  /* ---------- sheet ---------- */
+  .sheet-bg { position: absolute; inset: 0; background: rgba(0,0,0,.25); z-index: 10; display: flex; align-items: flex-end; animation: fade .2s; }
+  .sheet { width: 100%; background: var(--card); border-radius: 32px 32px 0 0; padding: 28px 26px 40px; animation: up .25s; }
+  .sheet h3 { margin: 0 0 6px; font-size: 18px; }
+  .sheet p { margin: 0 0 20px; color: #777; font-size: 14px; line-height: 1.6; }
+  .sheet button.row { display: block; width: 100%; text-align: left; padding: 16px 18px; border-radius: 18px; background: var(--bg); margin-top: 10px; font-size: 15px; font-weight: 500; }
+  @keyframes fade { from { opacity: 0; } }
+  @keyframes up { from { transform: translateY(40px); opacity: 0; } }
+
+  .slide { animation: slide .25s ease-out; }
+  @keyframes slide { from { opacity: 0; transform: translateY(8px); } }
+  .empty { text-align: center; color: var(--muted); padding: 60px 0; font-size: 15px; line-height: 1.8; }
+</style>
+</head>
+<body>
+<div class="phone" id="app"></div>
+
+<script>
+(() => {
+  // ---------- constants ----------
+  const COLORS = {
+    blue:    { solid: '#94B9EC', light: '#E3ECFB' },
+    yellow:  { solid: '#F9E06A', light: '#FDF5CF' },
+    pink:    { solid: '#F9C6D9', light: '#FDECF2' },
+    orange:  { solid: '#FDCB7E', light: '#FEEBD0' },
+    green:   { solid: '#B5D9A1', light: '#E6F2DE' },
+    purple:  { solid: '#CEC3EE', light: '#EFEBFA' },
+    rainbow: {
+      solid: 'linear-gradient(135deg,#F9C6D9,#FDCB7E,#F9E06A,#B5D9A1,#94B9EC,#CEC3EE)',
+      light: 'linear-gradient(135deg,#FDECF2,#FEEBD0,#FDF5CF,#E6F2DE,#E3ECFB,#EFEBFA)',
+      border: '#CEC3EE',
+    },
+  };
+  const DOW = ['一', '二', '三', '四', '五', '六', '日'];
+  const ICON = {
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+    next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    pen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.1 2.1 0 013 3L8 18l-4 1 1-4z"/><path d="M14.5 5.5l3 3"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 4v16M4 12h16"/></svg>',
+  };
+  const MASCOT = `
+    <svg class="mascot" viewBox="0 0 46 42" aria-hidden="true">
+      <path d="M23 40C9 31 1 23 1 13.5 1 6.5 6.5 1 13 1c4.3 0 7.8 2.3 10 5.5C25.2 3.3 28.7 1 33 1c6.5 0 12 5.5 12 12.5C45 23 37 31 23 40z" fill="#5F93C6"/>
+      <g class="eyes">
+        <ellipse class="eye" cx="18" cy="19" rx="2" ry="2.2" fill="#2F3A4A"/>
+        <ellipse class="eye" cx="28" cy="19" rx="2" ry="2.2" fill="#2F3A4A"/>
+      </g>
+    </svg>`;
+
+  // ---------- date helpers ----------
+  const pad = n => String(n).padStart(2, '0');
+  const key = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`;
+  const keyOf = dt => key(dt.getFullYear(), dt.getMonth(), dt.getDate());
+  const daysIn = (y, m) => new Date(y, m + 1, 0).getDate();
+  const mondayIndex = dt => (dt.getDay() + 6) % 7; // 0 = Mon
+  const now = new Date();
+  const TODAY = keyOf(now);
+  const shiftMonth = (y, m, delta) => { const d = new Date(y, m + delta, 1); return [d.getFullYear(), d.getMonth()]; };
+
+  // ---------- habit logic ----------
+  function freqLabel(unit, n) {
+    if (unit === 'day') return `every ${n} day${n > 1 ? 's' : ''}`;
+    if (unit === 'week') return `${n}x a week`;
+    return `${n}x a month`;
+  }
+  function targetFor(h, y, m) {
+    const days = daysIn(y, m);
+    if (h.unit === 'day') return Math.ceil(days / h.n);
+    if (h.unit === 'week') return Math.max(1, Math.round(days * h.n / 7));
+    return h.n;
+  }
+  function monthCount(h, y, m) {
+    const prefix = `${y}-${pad(m + 1)}-`;
+    let c = 0;
+    for (const k of h.checks) if (k.startsWith(prefix)) c++;
+    return c;
+  }
+  function monthStats(h, y, m) {
+    const target = targetFor(h, y, m);
+    const count = monthCount(h, y, m);
+    const achieved = Math.min(count, target);
+    return { target, count, achieved, pct: Math.round(achieved / target * 100) };
+  }
+
+  // ---------- demo data (in-memory only) ----------
+  let uid = 0;
+  function seed() {
+    let s = 7;
+    const rand = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+    const defs = [
+      ['奶茶日', 'week', 3, 'pink', .55],
+      ['騎車20分', 'day', 1, 'yellow', .35],
+      ['工作日', 'week', 3, 'green', .4],
+      ['開心創作', 'week', 1, 'orange', .3],
+      ['早點睡覺', 'day', 1, 'blue', .25],
+    ];
+    return defs.map(([name, unit, n, color, p]) => {
+      const checks = new Set();
+      for (let i = 1; i <= 75; i++) {
+        const dt = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+        if (rand() < p) checks.add(keyOf(dt));
+      }
+      return { id: ++uid, name, unit, n, color, checks };
+    });
+  }
+
+  // ---------- state ----------
+  const state = {
+    habits: seed(),
+    screen: 'home',     // home | detail | edit
+    tab: 'main',        // main | week | month
+    month: [now.getFullYear(), now.getMonth()],      // month tab
+    detailId: null,
+    detailMonth: [now.getFullYear(), now.getMonth()],
+    draft: null,        // { id?, name, unit, n, color }
+    sheet: false,
+    popId: null,
+  };
+  const app = document.getElementById('app');
+  const byId = id => state.habits.find(h => h.id === id);
+  const C = h => COLORS[h.color] || COLORS.blue;
+  const esc = s => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+
+  function toggle(h, k) {
+    if (k > TODAY) return;
+    h.checks.has(k) ? h.checks.delete(k) : h.checks.add(k);
+  }
+
+  // ---------- views ----------
+  function blobWidth(pct) { return `calc(56px + (100% - 56px) * ${pct / 100})`; }
+
+  function checkBtn(h) {
+    const done = h.checks.has(TODAY);
+    const style = done ? `background:${C(h).solid}` : '';
+    return `<button class="check ${done ? 'done' : ''} ${state.popId === h.id ? 'pop' : ''}" style="${style}" data-act="today" data-id="${h.id}" aria-label="今日打卡">${ICON.check}</button>`;
+  }
+
+  function viewMain() {
+    const [y, m] = [now.getFullYear(), now.getMonth()];
+    return `<div class="list">${state.habits.map(h => {
+      const { pct } = monthStats(h, y, m);
+      return `<div class="hcard">
+        <div class="blob" style="background:${C(h).solid};width:${blobWidth(pct)}"></div>
+        <div class="info" data-act="open" data-id="${h.id}">
+          <div class="hname">${esc(h.name)}</div>
+          <div class="hfreq">${freqLabel(h.unit, h.n)}</div>
+        </div>
+        <div class="pct">${pct}%</div>
+        ${checkBtn(h)}
+      </div>`;
+    }).join('')}</div>`;
+  }
+
+  function cellStyle(h, k) {
+    const c = C(h);
+    if (h.checks.has(k)) return `background:${c.solid}`;
+    if (k >= TODAY) return `background:#fff;border-color:${c.border || c.solid}`;
+    return `background:${c.light}`;
+  }
+
+  function viewWeek() {
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - mondayIndex(now));
+    const keys = [...Array(7)].map((_, i) => keyOf(new Date(start.getFullYear(), start.getMonth(), start.getDate() + i)));
+    return `<div class="list" style="gap:16px">${state.habits.map(h => `
+      <div class="wcard">
+        <div class="info" data-act="open" data-id="${h.id}">
+          <div class="hname">${esc(h.name)}</div>
+          <div class="hfreq">${freqLabel(h.unit, h.n)}</div>
+        </div>
+        <div class="wgrid">
+          ${DOW.map(d => `<div class="dow">${d}</div>`).join('')}
+          ${keys.map(k => k > TODAY
+            ? `<div class="cell" style="${cellStyle(h, k)}"></div>`
+            : `<button class="cell" style="${cellStyle(h, k)}" data-act="cell" data-id="${h.id}" data-k="${k}" aria-label="${k}"></button>`).join('')}
+        </div>
+        ${checkBtn(h)}
+      </div>`).join('')}</div>`;
+  }
+
+  function viewMonth() {
+    const [y, m] = state.month;
+    const stats = state.habits.map(h => monthStats(h, y, m).pct);
+    const avg = stats.length ? Math.round(stats.reduce((a, b) => a + b, 0) / stats.length) : 0;
+    const lead = mondayIndex(new Date(y, m, 1));
+    const n = daysIn(y, m);
+    const isCurrent = y === now.getFullYear() && m === now.getMonth();
+    return `
+      <div class="mhead">
+        <button class="arrow" data-act="mprev" aria-label="上個月">${ICON.back}</button>
+        <div class="mpill">
+          <div class="ym">${y}年 ${m + 1}月</div>
+          <div class="avg">平均完成度<b>${avg}%</b></div>
+        </div>
+        <button class="arrow" data-act="mnext" aria-label="下個月">${ICON.next}</button>
+      </div>
+      <div class="list">${state.habits.map((h, i) => `
+        <div class="mcard">
+          <div class="left" data-act="open" data-id="${h.id}">
+            <div><div class="hname">${esc(h.name)}</div><div class="hfreq">${freqLabel(h.unit, h.n)}</div></div>
+            <div class="pctsm">${stats[i]}%</div>
+          </div>
+          <div class="mgrid">
+            ${'<div></div>'.repeat(lead)}
+            ${[...Array(n)].map((_, d) => {
+              const k = key(y, m, d + 1);
+              return k > TODAY
+                ? `<div class="cell" style="${cellStyle(h, k)}"></div>`
+                : `<button class="cell" style="${cellStyle(h, k)}" data-act="cell" data-id="${h.id}" data-k="${k}" aria-label="${k}"></button>`;
+            }).join('')}
+          </div>
+          ${isCurrent ? checkBtn(h) : ''}
+        </div>`).join('')}</div>`;
+  }
+
+  function viewHome() {
+    const body = !state.habits.length
+      ? '<div class="empty">還沒有習慣喔<br>按右下角的 ＋ 開始慢慢長大吧</div>'
+      : state.tab === 'main' ? viewMain() : state.tab === 'week' ? viewWeek() : viewMonth();
+    return `
+      <div class="screen">
+        <div class="brand">${MASCOT}<h1>Slow Growing</h1><button class="menu-btn" data-act="menu" aria-label="選單"><span></span></button></div>
+        <div class="tabs">
+          ${['main', 'week', 'month'].map(t => `<button class="tab ${state.tab === t ? 'on' : ''}" data-act="tab" data-tab="${t}">${t[0].toUpperCase() + t.slice(1)}</button>`).join('')}
+        </div>
+        <div class="slide">${body}</div>
+      </div>
+      <div class="fade-bottom"></div>
+      <button class="fab" data-act="new" aria-label="新增習慣">${ICON.plus}</button>`;
+  }
+
+  function viewDetail() {
+    const h = byId(state.detailId);
+    const [y, m] = state.detailMonth;
+    const s = monthStats(h, y, m);
+    const c = C(h);
+    const lead = mondayIndex(new Date(y, m, 1));
+    const n = daysIn(y, m);
+    return `
+      <div class="screen slide">
+        <div class="topbar">
+          <button class="round" data-act="home" aria-label="返回">${ICON.back}</button>
+          <h2>${esc(h.name)}</h2>
+          <button class="round" data-act="edit" aria-label="編輯">${ICON.pen}</button>
+        </div>
+        <div class="card">
+          <div class="label">${m + 1}月完成度</div>
+          <div class="bigrow">
+            <div class="big">${s.pct}%</div>
+            <div class="chip" style="background:${c.light}">${freqLabel(h.unit, h.n)}</div>
+          </div>
+          <div class="bar" style="background:${c.light}"><div style="width:${s.pct}%;background:${c.solid}"></div></div>
+          <div class="sub">達成 ${s.achieved} / ${s.target} 次 · 共打卡 ${s.count} 天</div>
+        </div>
+        <div class="card" style="padding:26px 22px">
+          <div class="calhead">
+            <button class="arrow" data-act="dprev" aria-label="上個月">${ICON.back}</button>
+            <div class="ym">${y}年 ${m + 1}月</div>
+            <button class="arrow" data-act="dnext" aria-label="下個月">${ICON.next}</button>
+          </div>
+          <div class="cal">
+            ${DOW.map(d => `<div class="dow">${d}</div>`).join('')}
+            ${'<div></div>'.repeat(lead)}
+            ${[...Array(n)].map((_, d) => {
+              const k = key(y, m, d + 1);
+              const cls = (k === TODAY ? ' today' : '');
+              if (k > TODAY) return `<div class="day future">${d + 1}</div>`;
+              const bg = h.checks.has(k) ? c.solid : c.light;
+              return `<button class="day${cls}" style="background:${bg}" data-act="cell" data-id="${h.id}" data-k="${k}">${d + 1}</button>`;
+            }).join('')}
+          </div>
+          <div class="hint">點日期即可補打卡 / 取消</div>
+        </div>
+      </div>`;
+  }
+
+  function stepperText(unit, n) {
+    const zh = unit === 'day' ? `每 <em>${n}</em> 天` : unit === 'week' ? `每週 <em>${n}</em> 次` : `每月 <em>${n}</em> 次`;
+    return `<div class="t1">${zh}</div><div class="t2">${freqLabel(unit, n)}</div>`;
+  }
+  const MAXN = { day: 30, week: 7, month: 31 };
+
+  function viewEdit() {
+    const d = state.draft;
+    const c = COLORS[d.color];
+    const ready = d.name.trim().length > 0;
+    return `
+      <div class="screen slide">
+        <div class="topbar">
+          <button class="round" data-act="cancel" aria-label="取消">${ICON.close}</button>
+          <h2>${d.id ? '編輯習慣' : '新習慣'}</h2>
+          <button class="round save ${ready ? 'ready' : ''}" data-act="save" aria-label="儲存">${ICON.check}</button>
+        </div>
+        <input class="field" id="name" placeholder="想養成什麼習慣？" maxlength="16" value="${esc(d.name)}" autocomplete="off">
+        <div class="seg">
+          ${[['day', 'Day'], ['week', 'Week'], ['month', 'Month']].map(([u, l]) => `<button class="${d.unit === u ? 'on' : ''}" data-act="unit" data-unit="${u}">${l}</button>`).join('')}
+        </div>
+        <div class="card" style="padding:26px 22px 26px 30px">
+          <div class="stepper">
+            <div>${stepperText(d.unit, d.n)}</div>
+            <div class="stepctl">
+              <button data-act="dec" ${d.n <= 1 ? 'disabled' : ''} aria-label="減少">−</button>
+              <output>${d.n}</output>
+              <button data-act="inc" ${d.n >= MAXN[d.unit] ? 'disabled' : ''} aria-label="增加">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="label">顏色</div>
+          <div class="colors">
+            ${Object.keys(COLORS).map(k => `<button class="swatch ${d.color === k ? 'on' : ''}" style="background:${k === 'rainbow' ? 'conic-gradient(#F9C6D9,#FDCB7E,#F9E06A,#B5D9A1,#94B9EC,#CEC3EE,#F9C6D9)' : COLORS[k].solid}" data-act="color" data-color="${k}" aria-label="${k}"></button>`).join('')}
+          </div>
+        </div>
+        <div class="preview">
+          <div class="hcard">
+            <div class="blob" style="background:${c.solid};width:${blobWidth(65)}"></div>
+            <div class="info"><div class="hname" id="pvname">${esc(d.name.trim() || '習慣名稱')}</div><div class="hfreq">${freqLabel(d.unit, d.n)}</div></div>
+          </div>
+          <div class="cap">預覽</div>
+        </div>
+        ${d.id ? '<button class="danger" data-act="delete">刪除這個習慣</button>' : ''}
+      </div>`;
+  }
+
+  function viewSheet() {
+    return `<div class="sheet-bg" data-act="closesheet"><div class="sheet" data-stop>
+      <h3>Slow Growing · Demo</h3>
+      <p>這是 POC 示範版本，資料只存在記憶體中，重新整理頁面就會回到預設資料。</p>
+      <button class="row" data-act="reset">重置示範資料</button>
+      <button class="row" data-act="clear">清空所有習慣</button>
+      <button class="row" data-act="closesheet">關閉</button>
+    </div></div>`;
+  }
+
+  function render() {
+    const scrollEl = app.querySelector('.screen');
+    const keep = scrollEl && state._keepScroll ? scrollEl.scrollTop : 0;
+    let html = state.screen === 'detail' ? viewDetail() : state.screen === 'edit' ? viewEdit() : viewHome();
+    if (state.sheet) html += viewSheet();
+    app.innerHTML = html;
+    if (state._keepScroll) {
+      const s = app.querySelector('.screen');
+      if (s) s.scrollTop = keep;
+      app.querySelectorAll('.slide').forEach(el => el.classList.remove('slide'));
+    }
+    state._keepScroll = false;
+    state.popId = null;
+  }
+  // re-render without entry animation, preserving scroll
+  const refresh = () => { state._keepScroll = true; render(); };
+
+  // ---------- events ----------
+  app.addEventListener('click', e => {
+    const t = e.target.closest('[data-act],[data-stop]');
+    if (!t || t.hasAttribute('data-stop') && !t.dataset.act) return;
+    const act = t.dataset.act;
+    const id = Number(t.dataset.id);
+    const d = state.draft;
+    switch (act) {
+      case 'tab': state.tab = t.dataset.tab; render(); break;
+      case 'today': {
+        const h = byId(id); toggle(h, TODAY);
+        if (h.checks.has(TODAY)) state.popId = id;
+        refresh(); break;
+      }
+      case 'cell': toggle(byId(id), t.dataset.k); refresh(); break;
+      case 'open': state.detailId = id; state.detailMonth = [now.getFullYear(), now.getMonth()]; state.screen = 'detail'; render(); break;
+      case 'home': state.screen = 'home'; render(); break;
+      case 'mprev': state.month = shiftMonth(...state.month, -1); refresh(); break;
+      case 'mnext': state.month = shiftMonth(...state.month, 1); refresh(); break;
+      case 'dprev': state.detailMonth = shiftMonth(...state.detailMonth, -1); refresh(); break;
+      case 'dnext': state.detailMonth = shiftMonth(...state.detailMonth, 1); refresh(); break;
+      case 'new': state.draft = { name: '', unit: 'day', n: 1, color: 'blue' }; state.screen = 'edit'; render(); break;
+      case 'edit': {
+        const h = byId(state.detailId);
+        state.draft = { id: h.id, name: h.name, unit: h.unit, n: h.n, color: h.color };
+        state.screen = 'edit'; render(); break;
+      }
+      case 'cancel': state.screen = d.id ? 'detail' : 'home'; render(); break;
+      case 'unit': d.unit = t.dataset.unit; d.n = Math.min(d.n, MAXN[d.unit]); refresh(); break;
+      case 'dec': d.n = Math.max(1, d.n - 1); refresh(); break;
+      case 'inc': d.n = Math.min(MAXN[d.unit], d.n + 1); refresh(); break;
+      case 'color': d.color = t.dataset.color; refresh(); break;
+      case 'save': {
+        const name = d.name.trim();
+        if (!name) { app.querySelector('#name').focus(); break; }
+        if (d.id) {
+          Object.assign(byId(d.id), { name, unit: d.unit, n: d.n, color: d.color });
+          state.screen = 'detail';
+        } else {
+          state.habits.push({ id: ++uid, name, unit: d.unit, n: d.n, color: d.color, checks: new Set() });
+          state.screen = 'home'; state.tab = 'main';
+        }
+        render(); break;
+      }
+      case 'delete':
+        if (confirm(`確定刪除「${d.name}」？`)) {
+          state.habits = state.habits.filter(h => h.id !== d.id);
+          state.screen = 'home'; render();
+        }
+        break;
+      case 'menu': state.sheet = true; refresh(); break;
+      case 'closesheet': state.sheet = false; refresh(); break;
+      case 'reset': uid = 0; state.habits = seed(); state.sheet = false; render(); break;
+      case 'clear': state.habits = []; state.sheet = false; render(); break;
+    }
+  });
+
+  // name input: update preview + save button without re-rendering (keeps focus)
+  app.addEventListener('input', e => {
+    if (e.target.id !== 'name') return;
+    state.draft.name = e.target.value;
+    app.querySelector('#pvname').textContent = e.target.value.trim() || '習慣名稱';
+    app.querySelector('.round.save').classList.toggle('ready', !!e.target.value.trim());
+  });
+  app.addEventListener('keydown', e => {
+    if (e.target.id === 'name' && e.key === 'Enter') app.querySelector('[data-act="save"]').click();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
