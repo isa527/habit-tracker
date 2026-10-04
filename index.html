@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Slow Growing</title>
+<title>Habit Tracker</title>
 <meta name="theme-color" content="#EDEDEA">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,8 +15,8 @@
     --ink: #2F2F2F;
     --muted: #8A8A8A;
     --line: #D9D9D6;
-    --accent: #5F93C6;
-    --accent-soft: #B7CDE0;
+    --accent: #FDAC53;
+    --accent-soft: #FBD7AB;
     --outer: #333333;
     --font: "Montserrat", "Noto Sans TC", system-ui, sans-serif;
   }
@@ -90,8 +90,8 @@
     transition: width .6s cubic-bezier(.3,1.4,.5,1);
   }
   .hcard .info { position: relative; flex: 1; min-width: 0; cursor: pointer; }
-  .hname { font-family: "Noto Sans TC", var(--font); font-weight: 700; font-size: 19px; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .hfreq { font-size: 13px; letter-spacing: 1px; margin-top: 4px; color: #444; }
+  .hname { font-family: "Noto Sans TC", var(--font); font-weight: 700; font-size: 16px; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hfreq { font-size: 12px; letter-spacing: 1px; margin-top: 4px; color: #444; }
   .pct { position: relative; font-size: 34px; font-weight: 400; margin-right: 18px; }
   .check {
     position: relative; flex: none;
@@ -184,16 +184,16 @@
   .seg button { flex: 1; height: 58px; border-radius: 30px; background: var(--card); font-size: 16px; font-weight: 500; letter-spacing: .5px; transition: background .2s, color .2s; }
   .seg button.on { background: var(--accent); color: #fff; }
   .stepper { display: flex; align-items: center; justify-content: space-between; }
-  .stepper .t1 { font-family: "Noto Sans TC", var(--font); font-size: 22px; font-weight: 700; letter-spacing: 2px; }
+  .stepper .t1 { white-space: nowrap; font-family: "Noto Sans TC", var(--font); font-size: 20px; font-weight: 700; letter-spacing: 2px; }
   .stepper .t1 em { font-style: normal; color: var(--accent); font-weight: 400; margin: 0 4px; }
   .stepper .t2 { font-size: 15px; letter-spacing: 1.5px; margin-top: 10px; }
-  .stepctl { display: flex; align-items: center; gap: 14px; }
-  .stepctl button { width: 56px; height: 56px; border-radius: 50%; background: #EDEDEA; font-size: 24px; display: grid; place-items: center; }
+  .stepctl { display: flex; align-items: center; gap: 8px; }
+  .stepctl button { width: 48px; height: 48px; border-radius: 50%; background: #EDEDEA; font-size: 24px; display: grid; place-items: center; }
   .stepctl button:disabled { opacity: .35; cursor: default; }
-  .stepctl output { width: 34px; text-align: center; font-size: 34px; }
-  .colors { display: flex; justify-content: space-between; margin-top: 22px; }
-  .swatch { width: 44px; height: 44px; border-radius: 50%; box-shadow: 0 0 0 0 var(--ink); transition: box-shadow .15s; }
-  .swatch.on { box-shadow: 0 0 0 4px #fff, 0 0 0 7px var(--ink); }
+  .stepctl output { width: 32px; text-align: center; font-size: 30px; }
+  .colors { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-top: 22px; justify-items: center; }
+  .swatch { width: 100%; max-width: 34px; aspect-ratio: 1; border-radius: 50%; box-shadow: 0 0 0 0 var(--ink); transition: box-shadow .15s; }
+  .swatch.on { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--ink); }
   .preview { margin-top: 6px; }
   .preview .hcard { padding-right: 30px; }
   .cap { text-align: center; font-size: 13px; color: #777; margin-top: 10px; letter-spacing: 2px; }
@@ -243,10 +243,16 @@
   };
   const MASCOT = `
     <svg class="mascot" viewBox="0 0 46 42" aria-hidden="true">
-      <path d="M23 40C9 31 1 23 1 13.5 1 6.5 6.5 1 13 1c4.3 0 7.8 2.3 10 5.5C25.2 3.3 28.7 1 33 1c6.5 0 12 5.5 12 12.5C45 23 37 31 23 40z" fill="#5F93C6"/>
+      <circle cx="9" cy="10" r="7" fill="#FDAC53"/>
+      <circle cx="37" cy="10" r="7" fill="#FDAC53"/>
+      <circle cx="9" cy="10" r="3.5" fill="#FDD3A2"/>
+      <circle cx="37" cy="10" r="3.5" fill="#FDD3A2"/>
+      <circle cx="23" cy="24" r="17" fill="#FDAC53"/>
+      <ellipse cx="23" cy="31" rx="7" ry="5" fill="#FDD3A2"/>
+      <ellipse cx="23" cy="29" rx="2.4" ry="1.7" fill="#3A2E25"/>
       <g class="eyes">
-        <ellipse class="eye" cx="18" cy="19" rx="2" ry="2.2" fill="#2F3A4A"/>
-        <ellipse class="eye" cx="28" cy="19" rx="2" ry="2.2" fill="#2F3A4A"/>
+        <circle class="eye" cx="16" cy="21" r="2" fill="#3A2E25"/>
+        <circle class="eye" cx="30" cy="21" r="2" fill="#3A2E25"/>
       </g>
     </svg>`;
 
@@ -421,7 +427,7 @@
       : state.tab === 'main' ? viewMain() : state.tab === 'week' ? viewWeek() : viewMonth();
     return `
       <div class="screen">
-        <div class="brand">${MASCOT}<h1>Slow Growing</h1><button class="menu-btn" data-act="menu" aria-label="選單"><span></span></button></div>
+        <div class="brand">${MASCOT}<h1>Habit Tracker</h1><button class="menu-btn" data-act="menu" aria-label="選單"><span></span></button></div>
         <div class="tabs">
           ${['main', 'week', 'month'].map(t => `<button class="tab ${state.tab === t ? 'on' : ''}" data-act="tab" data-tab="${t}">${t[0].toUpperCase() + t.slice(1)}</button>`).join('')}
         </div>
@@ -526,7 +532,7 @@
 
   function viewSheet() {
     return `<div class="sheet-bg" data-act="closesheet"><div class="sheet" data-stop>
-      <h3>Slow Growing · Demo</h3>
+      <h3>Habit Tracker · Demo</h3>
       <p>這是 POC 示範版本，資料只存在記憶體中，重新整理頁面就會回到預設資料。</p>
       <button class="row" data-act="reset">重置示範資料</button>
       <button class="row" data-act="clear">清空所有習慣</button>
